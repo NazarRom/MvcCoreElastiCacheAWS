@@ -1,4 +1,5 @@
-﻿using MvcCoreElastiCacheAWS.Helpers;
+﻿using Microsoft.Extensions.Caching.Distributed;
+using MvcCoreElastiCacheAWS.Helpers;
 using MvcCoreElastiCacheAWS.Models;
 using Newtonsoft.Json;
 using StackExchange.Redis;
@@ -7,19 +8,22 @@ namespace MvcCoreElastiCacheAWS.Services
 {
     public class ServiceAWSCache
     {
-        private IDatabase cache;
+        private IDistributedCache cache;
+        
 
-        public ServiceAWSCache()
+        public ServiceAWSCache(IDistributedCache cache)
         {
-            this.cache = HelperCacheRedis.Connection.GetDatabase();
+            this.cache = cache;
         }
+
+
 
         public async Task<List<Coche>> GetCochesFavoritosAsync()
         {
             //se supone que podriamos tener coches almacenados
             //mediante una key
             //almacenaremos los coches utilizando json y en una coleccion
-            string jsonCoches = await this.cache.StringGetAsync("cochesfavoritos");
+            string jsonCoches = await this.cache.GetStringAsync("cochesfavoritos");
             if(jsonCoches == null)
             {
                 return null;
@@ -46,7 +50,7 @@ namespace MvcCoreElastiCacheAWS.Services
             //serializamos a json
             string jsonCoches = JsonConvert.SerializeObject(coches);
             //almacenamos con la key de redis
-            await this.cache.StringSetAsync("cochesfavoritos", jsonCoches, TimeSpan.FromMinutes(30));
+            await this.cache.GetStringAsync("cochesfavoritos", jsonCoches, TimeSpan.FromMinutes(30));
 
         }
 
@@ -60,14 +64,14 @@ namespace MvcCoreElastiCacheAWS.Services
                 //comprobamos si ya no existen coches favoritos
                 if (cars.Count == 0)
                 {
-                    await this.cache.KeyDeleteAsync("cochesfavoritos");
+                    await this.cache.RemoveAsync("cochesfavoritos");
                 }
                 else
                 {
                     //SERIALIZAMOS Y ALMACENAMOS LA COLECCION ACTUALIZADA
                     string jsonCoches =
                         JsonConvert.SerializeObject(cars);
-                    await this.cache.StringSetAsync("cochesfavoritos"
+                    await this.cache.GetStringAsync("cochesfavoritos"
                         , jsonCoches, TimeSpan.FromMinutes(30));
                 }
             }

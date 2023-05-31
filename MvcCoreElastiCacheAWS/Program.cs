@@ -8,6 +8,13 @@ builder.Services.AddTransient<RepositoryCoches>();
 builder.Services.AddTransient<ServiceAWSCache>();
 builder.Services.AddControllersWithViews();
 
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+options.Configuration = "cache-coches.vpmzbl.ng.0001.use1.cache.amazonaws.com:6379";
+options.InstanceName = "ElastiCacheExample";
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
