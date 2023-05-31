@@ -50,7 +50,7 @@ namespace MvcCoreElastiCacheAWS.Services
             //serializamos a json
             string jsonCoches = JsonConvert.SerializeObject(coches);
             //almacenamos con la key de redis
-            await this.cache.GetStringAsync("cochesfavoritos", jsonCoches, TimeSpan.FromMinutes(30));
+            await this.cache.SetStringAsync("cochesfavoritos", jsonCoches, new DistributedCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(15)));
 
         }
 
@@ -71,8 +71,8 @@ namespace MvcCoreElastiCacheAWS.Services
                     //SERIALIZAMOS Y ALMACENAMOS LA COLECCION ACTUALIZADA
                     string jsonCoches =
                         JsonConvert.SerializeObject(cars);
-                    await this.cache.GetStringAsync("cochesfavoritos"
-                        , jsonCoches, TimeSpan.FromMinutes(30));
+                    await this.cache.SetStringAsync("cochesfavoritos"
+                        , jsonCoches, new DistributedCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(15)));
                 }
             }
 
